@@ -1,0 +1,35 @@
+name: SBOM Generation and Attestation
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+ build:
+   runs-on: ubuntu-latest
+   permissions:
+     actions: read
+     contents: write
+     id-token: write
+     attestations: write
+     packages: write
+    
+   steps:
+    - uses: actions/checkout@v3
+
+    - uses: advanced-security/sbom-generator-action@v0.0.1
+      id: sbom
+      env: 
+        GITHUB_TOKEN: ${{ github.token }}
+        
+    - uses: actions/attest-build-provenance@v2
+      with:
+       subject-path: ${{steps.sbom.outputs.fileName }}
+
+    -  uses: actions/upload-artifact@v3.1.0
+       with: 
+        path: ${{steps.sbom.outputs.fileName }}
+        name: "SBOM"
+
+       
+        

@@ -1,0 +1,10 @@
+name: "CodeQL config"
+queries: 
+  - name: Run Security and Quality
+    uses: security-and-quality
+  - name: Run custom queries
+    uses: ./queries/vue-xss.ql
+
+query-filters:
+  - exclude:
+      id: js/xss
