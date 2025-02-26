@@ -42,7 +42,7 @@ jobs:
       
       - name: Debug 
         run: |
-          echo "Changes :${{ steps.changes.outputs.changes }}"
+          echo "Changes :${{ fromJson(steps.changes.outputs.changes) }}"
 
         
 
