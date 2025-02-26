@@ -60,7 +60,7 @@ jobs:
                 DIRS_JSON="[$(IFS=,; echo "${DIRS_ARRAY[*]}")]"
             fi
     
-            echo "matrix=$DIRS_JSON" >> $GITHUB_OUTPUT
+            echo "matrix=$DIRS_JSON" >> "$GITHUB_OUTPUT"
             echo "Created matrix: $DIRS_JSON"
 
   analyze:
