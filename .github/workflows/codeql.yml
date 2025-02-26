@@ -61,7 +61,7 @@ jobs:
             fi
     
             echo "matrix=$DIRS_JSON" >> "$GITHUB_OUTPUT"
-            echo "Created matrix: $DIRS_JSON"
+            echo "Created matrix: $DIRS_JSON"            
 
   analyze:
     name: Analyze (${{ matrix.directory }})
@@ -93,23 +93,32 @@ jobs:
     - name: Map directory to language
       id: lang-mapping
       run: |
-          case "${{ matrix.directory }}" in
-            "frontend")
-              echo "LANG=javascript" >> $GITHUB_OUTPUT
-              ;;
-            "auth"|"auth-ext")
-              echo "LANG=go,python" >> $GITHUB_OUTPUT
-              ;;
-            "storage")
-              echo "LANG=java" >> $GITHUB_OUTPUT
-              ;;
-            "gallery")
-              echo "LANG=go" >> $GITHUB_OUTPUT
-              ;;
-            *)
-              echo "LANG=" >> $GITHUB_OUTPUT
-              ;;
-          esac
+        case "${{ matrix.directory }}" in
+          "frontend")
+            echo "LANG=javascript" >> $GITHUB_OUTPUT
+            echo "SHOULD_SCAN=true" >> $GITHUB_OUTPUT
+            ;;
+          "auth"|"auth-ext")
+            echo "LANG=go,python" >> $GITHUB_OUTPUT
+            echo "SHOULD_SCAN=true" >> $GITHUB_OUTPUT
+            ;;
+          "storage")
+            echo "LANG=java" >> $GITHUB_OUTPUT
+            echo "SHOULD_SCAN=true" >> $GITHUB_OUTPUT
+            ;;
+          "gallery")
+            echo "LANG=go" >> $GITHUB_OUTPUT
+            echo "SHOULD_SCAN=true" >> $GITHUB_OUTPUT
+            ;;
+          *)
+            echo "Directory '${{ matrix.directory }}' is not configured for scanning. Skipping."
+            echo "SHOULD_SCAN=false" >> $GITHUB_OUTPUT
+            exit 0
+            ;;
+        esac
+    
+        echo "Will scan '${{ matrix.directory }}' for ${{ steps.lang-mapping.outputs.LANG }} code"
+
           
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -117,11 +126,15 @@ jobs:
       with:
         languages: ${{ steps.lang-mapping.outputs.LANG }}
         build-mode: none
-        if: steps.lang-mapping.outputs.LANG != ''
+        if: steps.lang-mapping.outputs.SHOULD_SCAN == 'true'
+
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+      if: steps.lang-mapping.outputs.SHOULD_SCAN == 'true'
 
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
         category: "/directory:${{ matrix.directory }}"
-        if: steps.lang-mapping.outputs.LANG != ''
+      if: steps.lang-mapping.outputs.SHOULD_SCAN == 'true'
