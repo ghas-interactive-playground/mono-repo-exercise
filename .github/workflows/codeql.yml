@@ -34,10 +34,10 @@ jobs:
         run: |
           cd .github/scripts
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            changes=git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk | jq[]  >> "$GITHUB_OUTPUT"
+            changes=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk | jq[]) >> "$GITHUB_OUTPUT"
           else
             # For push events, compare with the previous commit
-            changes=git diff --name-only HEAD^ HEAD | awk -f process.awk | jq[] >> "$GITHUB_OUTPUT"
+            changes=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq[]) >> "$GITHUB_OUTPUT"
           fi
       
       - name: Debug 
