@@ -20,6 +20,34 @@ on:
     - cron: '19 1 * * 1'
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+          
+      - name: Find changed directories
+        id: changes
+        run: |
+          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+          else
+            # For push events, compare with the previous commit
+            CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          fi
+          
+          CHANGED_DIRS=$(echo "$CHANGED_FILES" | awk -F'/' '{print $1}' | sort -u | grep -v '^$' | tr '\n' ' ')
+          echo "DIRS=$CHANGED_DIRS" >> $GITHUB_OUTPUT
+          
+      - name: Set matrix
+        id: set-matrix
+        run: |
+          DIRS_JSON=$(echo "${{ steps.changes.outputs.DIRS }}" | tr ' ' '\n' | jq -R . | jq -s .)
+          echo "matrix=$DIRS_JSON" >> $GITHUB_OUTPUT
   analyze:
     name: Analyze (${{ matrix.directory }})
     runs-on: 'ubuntu-latest' 
@@ -37,53 +65,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-        - language: go
-          build-mode: autobuild
-        - language: java-kotlin
-          build-mode: none # This mode only analyzes Java. Set this to 'autobuild' or 'manual' to analyze Kotlin too.
-        - language: javascript-typescript
-          build-mode: none
-        - language: python
-          build-mode: none
-        # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
-        # Use `c-cpp` to analyze code written in C, C++ or both
-        # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
-        # Use 'javascript-typescript' to analyze code written in JavaScript, TypeScript or both
-        # To learn more about changing the languages that are analyzed or customizing the build mode for your analysis,
-        # see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/customizing-your-advanced-setup-for-code-scanning.
-        # If you are analyzing a compiled language, you can modify the 'build-mode' for that language to customize how
-        # your codebase is analyzed, see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/codeql-code-scanning-for-compiled-languages
-   
+        directory: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+        
     steps:
-
-    - name: Fetch Latest Changes (Push)
-      if: github.event_name == 'push'
-      run: |
-          git fetch --depth=2 origin ${{ github.sha }}
-
-    - name: Get changed files (PR)
-      if: github.event_name == 'pull_request'
-      run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          REPO=${{ github.repository }}
-          
-          CHANGED_FILES=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/$REPO/pulls/$PR_NUMBER/files" | jq -r '.[].filename')
-
-          # Extract unique directories
-          CHANGED_DIRS=$(echo "$CHANGED_FILES" | awk -F'/' '{print $1}' | sort -u | tr '\n' ' ')
-
-          echo "Changed Directories: $CHANGED_DIRS"
-          echo "CHANGED_DIRS=$CHANGED_DIRS" >> $GITHUB_ENV
-
-    - name: Set matrix
-      id: set-matrix
-      run: |
-          DIRS_JSON=$(echo "${{ steps.changes.outputs.CHANGED_DIRS }}" | tr ' ' '\n' | jq -R . | jq -s .)
-          echo "matrix=$DIRS_JSON" >> $GITHUB_OUTPUT
-
     - name: Checkout code
       uses: actions/checkout@v3
       with:
