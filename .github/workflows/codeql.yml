@@ -47,34 +47,21 @@ jobs:
       - name: Set matrix
         id: set-matrix
         run: |
-          # Get the changed directories from previous step
-          DIRS="${{ steps.changes.outputs.dirs }}"
-          
-          # Default to a dummy directory if none changed (prevents workflow failures)
-          if [ -z "$DIRS" ]; then
-            echo "No directories changed, using default"
-            echo "matrix={\"directory\":[\".\"]}" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          
-          # Build JSON array for matrix
-          JSON_DIRS="["
-          FIRST=true
-          
-          for DIR in $DIRS; do
-            if [ "$FIRST" = true ]; then
-              FIRST=false
+            # Create a valid JSON array from space-separated directory names
+            DIRS_ARRAY=()
+            for dir in ${{ steps.changes.outputs.DIRS }}; do
+              DIRS_ARRAY+=("\"$dir\"")
+            done
+    
+            # Join with commas and wrap in brackets to create a JSON array
+            if [ ${#DIRS_ARRAY[@]} -eq 0 ]; then
+                DIRS_JSON="[]"
             else
-              JSON_DIRS="$JSON_DIRS,"
+                DIRS_JSON="[$(IFS=,; echo "${DIRS_ARRAY[*]}")]"
             fi
-            JSON_DIRS="$JSON_DIRS\"$DIR\""
-          done
-          
-          JSON_DIRS="$JSON_DIRS]"
-          echo "JSON array: $JSON_DIRS"
-          
-          # Set the matrix output
-          echo "matrix={\"directory\":$JSON_DIRS}" >> $GITHUB_OUTPUT
+    
+            echo "matrix=$DIRS_JSON" >> $GITHUB_OUTPUT
+            echo "Created matrix: $DIRS_JSON"
  
   analyze:
     name: Analyze (${{ matrix.directory }})
