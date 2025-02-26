@@ -20,30 +20,34 @@ on:
     - cron: '19 1 * * 1'
 
 jobs:
-  detect-changes:
+  Analyze:
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 2
           
-      - name: Find changed directories
+      - name: Find changed directories and map to directories and languages
         id: changes
         run: |
+          cd .github/scripts
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+            changes=git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk | jq[]  >> "$GITHUB_OUTPUT"
           else
             # For push events, compare with the previous commit
-            CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+            changes=git diff --name-only HEAD^ HEAD | awk -f process.awk | jq[] >> "$GITHUB_OUTPUT"
           fi
+      
+      - name: Debug 
+        run: |
+          echo '${{ fromJSON(steps.changes.outputs.changes) }}'
 
-           echo "Changed files: $CHANGED_FILES"
+        
+
           
-         # CHANGED_DIRS=$(echo "$CHANGED_FILES" | awk -F'/' '{print $1}' | sort -u | grep -v '^$' | tr '\n' ' ')
-         # echo "DIRS=$CHANGED_DIRS" >> "$GITHUB_OUTPUT"
+        
             
           
 
