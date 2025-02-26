@@ -41,7 +41,7 @@ jobs:
           fi
           
           CHANGED_DIRS=$(echo "$CHANGED_FILES" | awk -F'/' '{print $1}' | sort -u | grep -v '^$' | tr '\n' ' ')
-          echo "DIRS=$CHANGED_DIRS" >> $GITHUB_OUTPUT
+          echo "DIRS=$CHANGED_DIRS" >> "$GITHUB_OUTPUT"
 
 
       - name: Set matrix
