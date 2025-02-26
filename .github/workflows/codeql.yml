@@ -65,6 +65,7 @@ jobs:
 
   analyze:
     name: Analyze (${{ matrix.directory }})
+    needs: detect-changes
     runs-on: 'ubuntu-latest' 
     permissions:
       # required for all workflows
@@ -80,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        directory: ${{ toJSON(needs.detect-changes.outputs.matrix) }}
+        directory: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
         
     steps:
     - name: Checkout code
