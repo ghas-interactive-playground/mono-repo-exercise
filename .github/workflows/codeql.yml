@@ -62,7 +62,7 @@ jobs:
             echo "matrix=$DIRS_JSON" >> $GITHUB_OUTPUT
             echo "Created matrix: $DIRS_JSON"
   analyze:
-    name: Analyze (${{ matrix.directory }})
+    name: Analyze 
     runs-on: 'ubuntu-latest' 
     permissions:
       # required for all workflows
