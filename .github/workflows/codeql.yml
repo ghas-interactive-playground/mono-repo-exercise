@@ -46,8 +46,21 @@ jobs:
       - name: Set matrix
         id: set-matrix
         run: |
-          DIRS_JSON=$(echo "${{ steps.changes.outputs.DIRS }}" | tr ' ' '\n' | jq -R . | jq -s .)
-          echo "matrix=$DIRS_JSON" >> $GITHUB_OUTPUT
+            # Create a valid JSON array from space-separated directory names
+            DIRS_ARRAY=()
+            for dir in ${{ steps.changes.outputs.DIRS }}; do
+              DIRS_ARRAY+=("\"$dir\"")
+            done
+    
+            # Join with commas and wrap in brackets to create a JSON array
+            if [ ${#DIRS_ARRAY[@]} -eq 0 ]; then
+                DIRS_JSON="[]"
+            else
+                DIRS_JSON="[$(IFS=,; echo "${DIRS_ARRAY[*]}")]"
+            fi
+    
+            echo "matrix=$DIRS_JSON" >> $GITHUB_OUTPUT
+            echo "Created matrix: $DIRS_JSON"
   analyze:
     name: Analyze (${{ matrix.directory }})
     runs-on: 'ubuntu-latest' 
