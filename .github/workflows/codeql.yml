@@ -42,25 +42,40 @@ jobs:
           
           CHANGED_DIRS=$(echo "$CHANGED_FILES" | awk -F'/' '{print $1}' | sort -u | grep -v '^$' | tr '\n' ' ')
           echo "DIRS=$CHANGED_DIRS" >> $GITHUB_OUTPUT
-          
+
+
       - name: Set matrix
         id: set-matrix
         run: |
-            # Create a valid JSON array from space-separated directory names
-            DIRS_ARRAY=()
-            for dir in ${{ steps.changes.outputs.DIRS }}; do
-              DIRS_ARRAY+=("\"$dir\"")
-            done
-    
-            # Join with commas and wrap in brackets to create a JSON array
-            if [ ${#DIRS_ARRAY[@]} -eq 0 ]; then
-                DIRS_JSON="[]"
+          # Get the changed directories from previous step
+          DIRS="${{ steps.changes.outputs.dirs }}"
+          
+          # Default to a dummy directory if none changed (prevents workflow failures)
+          if [ -z "$DIRS" ]; then
+            echo "No directories changed, using default"
+            echo "matrix={\"directory\":[\".\"]}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Build JSON array for matrix
+          JSON_DIRS="["
+          FIRST=true
+          
+          for DIR in $DIRS; do
+            if [ "$FIRST" = true ]; then
+              FIRST=false
             else
-                DIRS_JSON="[$(IFS=,; echo "${DIRS_ARRAY[*]}")]"
+              JSON_DIRS="$JSON_DIRS,"
             fi
-    
-            echo "matrix=$DIRS_JSON" >> $GITHUB_OUTPUT
-            echo "Created matrix: $DIRS_JSON"
+            JSON_DIRS="$JSON_DIRS\"$DIR\""
+          done
+          
+          JSON_DIRS="$JSON_DIRS]"
+          echo "JSON array: $JSON_DIRS"
+          
+          # Set the matrix output
+          echo "matrix={\"directory\":$JSON_DIRS}" >> $GITHUB_OUTPUT
+ 
   analyze:
     name: Analyze (${{ matrix.directory }})
     runs-on: 'ubuntu-latest' 
@@ -78,7 +93,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        directory: ${{ (needs.detect-changes.outputs.matrix) }}
+        directory: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
         
     steps:
     - name: Checkout code
