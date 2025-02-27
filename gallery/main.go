@@ -25,7 +25,6 @@ type Configuration struct {
 	AllowedOrigins []string `json:"allowed-origins"`
 }
 
-// A configuration object
 var configuration *Configuration
 
 func LoadConfiguration(path string) (*Configuration, error) {
