@@ -2,11 +2,12 @@
 
 BEGIN {
   # identify source code language for each directory
-  while ("cat lang_for_dir.txt" | getline) {
+  while ("cat cfg_for_dir.txt" | getline) {
     # fields are delimited with a semicolon
     split($0, record, ";")
-    # lang_for_dir[<path>] = <language>
-    lang_for_dir[record[1]] = record[2]
+    # cfg_for_dir[<path>][<cfg.key>] = <cfg.value>
+    cfg_for_dir[record[1]]["lang"] = record[2]
+    cfg_for_dir[record[1]]["build_mode"] = record[3]
   }
 
   # create dirs variable as empty array
@@ -20,7 +21,12 @@ BEGIN {
   # skip directory if already procesed
   if (!dirs[$1]) {
     # record directory where files have changed, and programming language for codeql analysis 
-    dirs[$1] = sprintf("{\"directory\": \"%s\", \"language\": \"%s\", \"build-mode\": \"%s\"}", $1, lang_for_dir[$1], lang_for_dir[$2])
+    dirs[$1] = sprintf( \
+      "{\"directory\": \"%s\", \"language\": \"%s\", \"build_mode\": \"%s\"}", \
+      $1, \
+      cfg_for_dir[$1]["lang"], \
+      cfg_for_dir[$1]["build_mode"] \
+    )
   }
 }
 

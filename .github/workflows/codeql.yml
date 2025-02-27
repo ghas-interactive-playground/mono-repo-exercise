@@ -20,10 +20,10 @@ on:
     - cron: '19 1 * * 1'
 
 jobs:
-  detect-changes:
+  detect_changes:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.detect-changes.outputs.matrix }}
+      matrix: ${{ steps.detect_changes.outputs.matrix }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
           fetch-depth: 2
           
       - name: Find changed directories and map to directories and languages
-        id: detect-changes
+        id: detect_changes
         run: |
           cd .github/scripts
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
@@ -49,7 +49,7 @@ jobs:
 
   analyze:
     name: Analyze (${{ matrix.language }})
-    needs: detect-changes
+    needs: detect_changes
     runs-on: 'ubuntu-latest' 
     permissions:
       # required for all workflows
@@ -64,7 +64,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: 
-        include: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+        include: ${{ fromJson(needs.detect_changes.outputs.matrix) }}
 
     steps:
         - name: Checkout repository
@@ -74,16 +74,12 @@ jobs:
               ${{ matrix.directory }}
             sparse-checkout-cone-mode: false
         
-        - name: Debug
-          run: |
-            ls -la
-            pwd
-      
+
         - name: Initialize CodeQL
           uses: github/codeql-action/init@v3
           with:
               languages: ${{ matrix.language }}
-              build-mode: none
+              build-mode: ${{ matrix.build_mode }}
 
         - name: Perform CodeQL Analysis
           uses: github/codeql-action/analyze@v3

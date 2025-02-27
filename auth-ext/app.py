@@ -19,6 +19,7 @@ CLIENT_ID = os.getenv("OIDC_CLIENT_ID")
 CLIENT_SECRET = os.getenv("OIDC_CLIENT_SECRET")
 OIDC_ISSUER = os.getenv("OIDC_ISSUER")
 
+## This is a very basic implementation of an OpenID Connect client.
 def get_access_token(code):
     app.logger.debug('Requesting access token')
     credentials = base64.standard_b64encode(
