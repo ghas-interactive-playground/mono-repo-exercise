@@ -20,13 +20,10 @@ on:
     - cron: '19 1 * * 1'
 
 jobs:
-  Analyze:
+  Detect-Changes:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJson(steps.detect-changes.outputs.changes).changes }}
-
+    outputs:
+      changes: ${{ steps.detect-changes.outputs.changes }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -43,13 +40,31 @@ jobs:
             # For push events, compare with the previous commit
             echo "changes=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
           fi
+    
+  Analyze:
+    name: Analyze (${{ matrix.language }})
+    needs: Detect-Changes
+    runs-on: 'ubuntu-latest' 
+    permissions:
+      # required for all workflows
+      security-events: write
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-            languages: ${{ matrix.language }}
-            source-root: ${{ matrix.directory }}
-      
+      # required to fetch internal or private CodeQL packs
+      packages: read
+
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.detect-changes.outputs.changes).changes }}
+
+    steps:
+      - name: Debug
+        run: |
+          echo "Directory: ${{ matrix.directory }}"
+          echo "Language: ${{ matrix.language }}"
+
 
       
 
