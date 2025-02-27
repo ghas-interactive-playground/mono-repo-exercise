@@ -76,8 +76,8 @@ jobs:
         
         - name: Debug
           run: |
-            echo ls -la
-            echo pwd
+            ls -la
+            pwd
       
         - name: Initialize CodeQL
           uses: github/codeql-action/init@v3
