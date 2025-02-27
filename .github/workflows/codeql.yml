@@ -22,6 +22,10 @@ on:
 jobs:
   Analyze:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(steps.detect-changes.outputs.changes).changes }}
 
     steps:
       - name: Checkout repository
@@ -30,7 +34,7 @@ jobs:
           fetch-depth: 2
           
       - name: Find changed directories and map to directories and languages
-        id: changes
+        id: detect-changes
         run: |
           cd .github/scripts
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
@@ -39,10 +43,15 @@ jobs:
             # For push events, compare with the previous commit
             echo "changes=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
           fi
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+            languages: ${{ matrix.language }}
+            source-root: ${{ matrix.directory }}
       
-      - name: Debug 
-        run: |
-          echo "Changes :${{ fromJson(steps.changes.outputs.changes) }}"
+
+      
 
         
 
