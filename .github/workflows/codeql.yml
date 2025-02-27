@@ -23,7 +23,7 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
-      changes: ${{ steps.detect-changes.outputs.changes }}
+      matrix: ${{ steps.detect-changes.outputs.changes }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -35,11 +35,12 @@ jobs:
         run: |
           cd .github/scripts
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            echo "changes=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk | jq )" >> $GITHUB_OUTPUT
+            echo "changes=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
           else
             # For push events, compare with the previous commit
-            echo "changes=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq )" >> $GITHUB_OUTPUT
+            echo "changes=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
           fi
+          
     
   analyze:
     name: Analyze (${{ matrix.language }})
@@ -57,7 +58,7 @@ jobs:
       contents: read
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.detect-changes.outputs.changes) }}
+      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
 
     steps:
       - name: Debug
