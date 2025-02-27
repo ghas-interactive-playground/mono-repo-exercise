@@ -9,6 +9,7 @@ import (
 
 var (
 	// we use the default login UI and pass the (auth request) id
+	// this will be used to identify the user session
 	defaultLoginURL = func(id string) string {
 		return "/login/username?authRequestID=" + id
 	}

@@ -1,6 +1,6 @@
-auth;python
+auth;go
 frontend;javascript-typescript
 storage;java-kotlin
-auth-ext;go
+auth-ext;python
 gallery;go
 .github;actions

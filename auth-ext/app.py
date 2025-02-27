@@ -41,6 +41,7 @@ def get_access_token(code):
         return (None, data['error_description'])
 
     # return ({'access_token': data['access_token'], 'scope': data['scope'], 'token_type': data['token_type']}, None)
+    # return (data, None)
     return (data, None)
 
 def get_user_profile(access_token):
