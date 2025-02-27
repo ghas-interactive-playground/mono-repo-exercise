@@ -41,6 +41,9 @@ jobs:
             echo "changes=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
           fi
 
+          #print the changes
+          echo "Changes: $(echo $changes)"
+
           
           
     
@@ -60,7 +63,7 @@ jobs:
       contents: read
     strategy:
       fail-fast: false
-      matrix: ${{ needs.detect-changes.outputs.matrix }}
+      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
 
     steps:
       - name: Debug
