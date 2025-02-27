@@ -73,6 +73,11 @@ jobs:
             sparse-checkout: |
               ${{ matrix.directory }}
             sparse-checkout-cone-mode: false
+        
+        - name: Debug
+          run: |
+            echo ls -la
+            echo pwd
       
         - name: Initialize CodeQL
           uses: github/codeql-action/init@v3
