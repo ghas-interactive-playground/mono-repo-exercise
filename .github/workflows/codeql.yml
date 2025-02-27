@@ -35,10 +35,10 @@ jobs:
         run: |
           cd .github/scripts
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-           CHANGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk | jq -c .) 
+           CHANGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk | jq -c '.changes') 
           else
             # For push events, compare with the previous commit
-            CHANGES=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c .)
+            CHANGES=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c '.changes')
           fi
 
           # Store in output and also in a variable for debugging
@@ -64,7 +64,7 @@ jobs:
       contents: read
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix.changes) }}
+      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
 
     steps:
       - name: Debuggi
