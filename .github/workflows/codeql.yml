@@ -20,7 +20,7 @@ on:
     - cron: '19 1 * * 1'
 
 jobs:
-  Detect-Changes:
+  detect-changes:
     runs-on: ubuntu-latest
     outputs:
       changes: ${{ steps.detect-changes.outputs.changes }}
@@ -41,9 +41,9 @@ jobs:
             echo "changes=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
           fi
     
-  Analyze:
+  analyze:
     name: Analyze (${{ matrix.language }})
-    needs: Detect-Changes
+    needs: detect-changes
     runs-on: 'ubuntu-latest' 
     permissions:
       # required for all workflows
