@@ -18,6 +18,7 @@ const (
 	CustomClaim = "custom_claim"
 
 	// CustomScopeImpersonatePrefix is an example scope prefix for passing user id to impersonate using token exchage
+	// this will be used to identify the user session
 	CustomScopeImpersonatePrefix = "custom_scope:impersonate:"
 )
 

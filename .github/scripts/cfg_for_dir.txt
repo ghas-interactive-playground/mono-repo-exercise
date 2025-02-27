@@ -1,6 +1,6 @@
-auth;python;none
+auth;go;none
 frontend;javascript;none
 storage;java;none
-auth-ext;go;autobuild
+auth-ext;python;autobuild
 gallery;go;autobuild
 .github;actions;none

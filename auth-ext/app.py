@@ -43,6 +43,7 @@ def get_access_token(code):
 
     return (data, None)
 
+# This will get a user profile from the userinfo endpoint
 def get_user_profile(access_token):
     app.logger.debug('Request user profile')
     r = requests.get(f'{OIDC_ISSUER}userinfo', headers={

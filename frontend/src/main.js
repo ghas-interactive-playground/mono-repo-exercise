@@ -13,7 +13,7 @@ import store from './stores/store'
 
 const app = createApp(App)
 
-//  Axios.defaults.baseURL = 'http://localhost:5000/api/'
+
 Axios.interceptors.request.use(function (config) {
     const token = store.getters.token
     if (token != '') {
