@@ -28,25 +28,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 2
           
       - name: Find changed directories and map to directories and languages
         id: detect-changes
         run: |
           cd .github/scripts
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            echo "matrix=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
+           CHANGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk | jq -c .) 
           else
             # For push events, compare with the previous commit
-            echo "matrix=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
+            CHANGES=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c .)
           fi
 
-          #print the changes
-          echo "Changes: $(echo $matrix)"
-
-          
-          
+          # Store in output and also in a variable for debugging
+          echo "matrix=$CHANGES" >> $GITHUB_OUTPUT
     
+          # Print the changes for debugging
+          echo "Changes found: $CHANGES")"
+
+
   analyze:
     name: Analyze (${{ matrix.language }})
     needs: detect-changes
