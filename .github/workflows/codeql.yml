@@ -26,7 +26,7 @@ jobs:
       matrix: ${{ steps.detect-changes.outputs.matrix }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
           
@@ -46,7 +46,6 @@ jobs:
     
           # Print the changes for debugging
           echo "Changes found: $CHANGES"
-
 
   analyze:
     name: Analyze (${{ matrix.language }})
@@ -68,10 +67,28 @@ jobs:
         include: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
 
     steps:
-      - name: Debuggi
-        run: |
-          echo "Directory: ${{ matrix.directory }}"
-          echo "Language: ${{ matrix.language }}"
+        - name: Checkout repository
+          uses: actions/checkout@v4
+          with:
+            sparse-checkout: |
+              ${{ matrix.directory }}
+            sparse-checkout-cone-mode: false
+      
+        - name: Initialize CodeQL
+          uses: github/codeql-action/init@v3
+          with:
+              languages: ${{ matrix.language }}
+              build-mode: none
+
+        - name: Perform CodeQL Analysis
+          uses: github/codeql-action/analyze@v3
+          with:
+           category: "/language:${{matrix.language}}/app:${{matrix.directory}}"
+        
+        
+            
+
+        
 
 
       
