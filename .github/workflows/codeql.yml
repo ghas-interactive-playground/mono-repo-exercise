@@ -23,7 +23,7 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.detect-changes.outputs.changes }}
+      matrix: ${{ steps.detect-changes.outputs.matrix }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -35,14 +35,14 @@ jobs:
         run: |
           cd .github/scripts
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            echo "changes=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
+            echo "matrix=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
           else
             # For push events, compare with the previous commit
-            echo "changes=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
+            echo "matrix=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
           fi
 
           #print the changes
-          echo "Changes: $(echo $changes)"
+          echo "Changes: $(echo $matrix)"
 
           
           
