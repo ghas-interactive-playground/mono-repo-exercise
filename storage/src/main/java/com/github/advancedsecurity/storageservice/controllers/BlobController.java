@@ -37,6 +37,7 @@ public class BlobController {
     @Value("${blob.allowed-content-types}")
     private List<String> allowedContentTypes;
 
+    // @Value("${blob.allowed-content-types}")
     @Value("${minio.put-object-part-size}")
     private long putObjectPartSize;
 

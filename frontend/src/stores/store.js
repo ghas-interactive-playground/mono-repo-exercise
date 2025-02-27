@@ -18,7 +18,7 @@ const store = createStore({
       },
       actions: {
         // authenticate({ commit }, {code, state}) {
-        //test
+        // this is a comment
         authenticate({ commit }, {code}) {
           return new Promise((resolve, reject) => {
             Axios.get(`http://localhost:5000/authenticate/${code}`).then((response) => {

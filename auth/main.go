@@ -11,6 +11,7 @@ import (
 
 func main() {
 	//we will run on :9998
+	//you can change this to any port you like
 	port := "9998"
 	//which gives us the issuer: http://localhost:9998/
 	issuer := fmt.Sprintf("http://localhost:%s/", port)

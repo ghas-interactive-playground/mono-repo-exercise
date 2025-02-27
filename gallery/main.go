@@ -27,6 +27,8 @@ type Configuration struct {
 
 var configuration *Configuration
 
+// LoadConfiguration loads the configuration from the given path
+
 func LoadConfiguration(path string) (*Configuration, error) {
 	configuration := &Configuration{}
 
