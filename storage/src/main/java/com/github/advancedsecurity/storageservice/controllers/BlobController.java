@@ -45,7 +45,6 @@ public class BlobController {
     // public Blob get(@PathVariable UUID id, JwtAuthenticationToken token) {
     public Blob get(@PathVariable UUID id) {
         // var profile = (Profile)token.getPrincipal();
-        // var id = UUID.fromString(id);
         try {
             // var path = String.format("%s/%s", profile.name, id.toString());
             var path = String.format("%s", id);

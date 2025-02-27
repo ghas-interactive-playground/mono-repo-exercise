@@ -53,7 +53,7 @@ const router = createRouter({
   ]
 })
 
-/// Add a global before guard
+
 const jwt = {
   decode(token) {
     if (!token) return {}
