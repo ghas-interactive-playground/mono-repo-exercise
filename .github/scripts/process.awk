@@ -20,7 +20,7 @@ BEGIN {
   # skip directory if already procesed
   if (!dirs[$1]) {
     # record directory where files have changed, and programming language for codeql analysis 
-    dirs[$1] = sprintf("{\"directory\": \"%s\", \"language\": \"%s\"}", $1, lang_for_dir[$1])
+    dirs[$1] = sprintf("{\"directory\": \"%s\", \"language\": \"%s\", \"build-mode\": \"%s\"}", $1, lang_for_dir[$1], lang_for_dir[$2])
   }
 }
 

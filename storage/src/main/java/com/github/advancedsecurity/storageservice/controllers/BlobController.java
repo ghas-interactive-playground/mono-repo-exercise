@@ -43,8 +43,6 @@ public class BlobController {
 
     @GetMapping("/blob/{id}")
     // public Blob get(@PathVariable UUID id, JwtAuthenticationToken token) {
-    //test
-    // more test
     public Blob get(@PathVariable UUID id) {
         // var profile = (Profile)token.getPrincipal();
         try {

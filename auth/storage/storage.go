@@ -572,6 +572,7 @@ func (s *Storage) ValidateJWTProfileScopes(ctx context.Context, userID string, s
 }
 
 // Health implements the op.Storage interface
+// it will be called to check if the storage is healthy
 func (s *Storage) Health(ctx context.Context) error {
 	return nil
 }
