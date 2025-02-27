@@ -45,7 +45,7 @@ jobs:
           echo "matrix=$CHANGES" >> $GITHUB_OUTPUT
     
           # Print the changes for debugging
-          echo "Changes found: $CHANGES")"
+          echo "Changes found: $CHANGES"
 
 
   analyze:
