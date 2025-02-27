@@ -64,7 +64,8 @@ jobs:
       contents: read
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+      matrix: 
+        include: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
 
     steps:
       - name: Debuggi
