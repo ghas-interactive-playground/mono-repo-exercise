@@ -40,6 +40,8 @@ jobs:
             # For push events, compare with the previous commit
             echo "changes=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c .)" >> $GITHUB_OUTPUT
           fi
+
+          
           
     
   analyze:
@@ -58,7 +60,7 @@ jobs:
       contents: read
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+      matrix: ${{ needs.detect-changes.outputs.matrix }}
 
     steps:
       - name: Debug
