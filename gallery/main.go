@@ -24,7 +24,7 @@ type Configuration struct {
 	Secret         string   `json:"secret"`
 	AllowedOrigins []string `json:"allowed-origins"`
 }
-
+// this is a config
 var configuration *Configuration
 
 func LoadConfiguration(path string) (*Configuration, error) {
