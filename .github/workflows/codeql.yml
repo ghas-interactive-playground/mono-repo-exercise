@@ -74,7 +74,6 @@ jobs:
               ${{ matrix.directory }}
             sparse-checkout-cone-mode: false
         
-
         - name: Initialize CodeQL
           uses: github/codeql-action/init@v3
           with:
@@ -85,8 +84,12 @@ jobs:
           uses: github/codeql-action/analyze@v3
           with:
            category: "/language:${{matrix.language}}/app:${{matrix.directory}}"
-        
-        
+
+        - name: Upload SARIF
+          uses: github/codeql-action/upload-sarif@v3
+          with:
+           sarif_file: empty.sarif
+           category: "/language:java-kotlin/app:storage"       
             
 
         
