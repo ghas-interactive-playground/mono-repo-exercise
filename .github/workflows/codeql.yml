@@ -86,6 +86,7 @@ jobs:
           with:
            category: "/language:${{matrix.language}}/app:${{matrix.directory}}"
 
+        - name: Upload SARIF
           uses: github/codeql-action/upload-sarif@v3
           with:
            sarif_file: scripts/empty.sarif
