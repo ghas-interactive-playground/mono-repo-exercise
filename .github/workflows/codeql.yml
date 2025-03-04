@@ -72,7 +72,7 @@ jobs:
           with:
             sparse-checkout: |
               ${{ matrix.directory }}
-              scripts/empty.sarif
+              .github/scripts/empty.sarif
             sparse-checkout-cone-mode: false
         
 
