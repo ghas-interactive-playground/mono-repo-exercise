@@ -7,18 +7,6 @@ import AuthorizationCallback from '../views/AuthorizationCallbackView.vue'
 import Gallery from '../views/GalleryView.vue'
 
 
-// const router = new VueRouter({
-//   mode: 'history',
-//   routes: [
-//     { path: '/', redirect: '/gallery'},
-//     { path: '/login', name: 'Login', component: Login },
-//     { path: '/login/callback', name: "AuthorizationCallback", component: AuthorizationCallback },
-//     { path: '/logout', name: 'Logout', component: Logout},
-//     { path: '/gallery', name: 'Gallery', component: Gallery, meta: { requiresAuth: true } },
-//     { path: '*', component: NotFound }
-//   ]
-// })
-
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
