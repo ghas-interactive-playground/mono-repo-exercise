@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.detect_changes.outputs.matrix }}
+      matrix_no_changes: ${{ steps.detect_changes.outputs.matrix_no_changes }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,17 +36,24 @@ jobs:
         run: |
           cd .github/scripts
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-           CHANGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk | jq -c '.changes') 
-          else
+           DIFF=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | awk -f process.awk ) 
+           CHANGES=$(echo "$DIFF" | jq -c '.changes')
+           NO_CHANGES=$(echo "$DIFF" | jq -c '.no_changes')
+         
+           else
             # For push events, compare with the previous commit
-            CHANGES=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c '.changes')
+            DIFF=$(git diff --name-only HEAD^ HEAD | awk -f process.awk | jq -c '.changes')
+            CHANGES=$(echo "$DIFF" | jq -c '.changes')
+            NO_CHANGES=$(echo "$DIFF" | jq -c '.no_changes')
           fi
 
           # Store in output and also in a variable for debugging
           echo "matrix=$CHANGES" >> $GITHUB_OUTPUT
+          echo "matrix_no_changes=$NO_CHANGES" >> $GITHUB_OUTPUT
     
           # Print the changes for debugging
           echo "Changes found: $CHANGES"
+          echo "No changes found: $NO_CHANGES"
 
   analyze:
     name: Analyze (${{ matrix.language }})
@@ -62,7 +70,7 @@ jobs:
       actions: read
       contents: read
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix: 
         include: ${{ fromJson(needs.detect_changes.outputs.matrix) }}
 
@@ -73,8 +81,7 @@ jobs:
             sparse-checkout: |
               ${{ matrix.directory }}
               .github/scripts/empty.sarif
-            sparse-checkout-cone-mode: false
-        
+            sparse-checkout-cone-mode: false       
 
         - name: Initialize CodeQL
           uses: github/codeql-action/init@v3
@@ -87,11 +94,37 @@ jobs:
           with:
            category: "/language:${{matrix.language}}/app:${{matrix.directory}}"
 
-        - name: Upload SARIF
-          uses: github/codeql-action/upload-sarif@v3
-          with:
-           sarif_file: .github/scripts/empty.sarif
-           category: "/language:java-kotlin/app:storage" 
+  process_sarif:
+      name: Process SARIF
+      needs: [detect_changes, analyze]
+      runs-on: ubuntu-latest
+      permissions:
+        security-events: write
+        actions: read
+      strategy:
+        fail-fast: true
+        matrix: 
+          include: ${{ fromJson(needs.detect_changes.outputs.matrix_no_changes) }}
+
+      steps:
+       - name: Checkout repository
+         uses: actions/checkout@v4
+         with:
+          sparse-checkout: |
+            .github/scripts/empty.sarif
+          sparse-checkout-cone-mode: false
+      
+       - name: Process SARIF
+         uses: github/codeql-action/upload-sarif@v3
+         with:
+            sarif_file: .github/scripts/empty.sarif
+            category: "/language:${{matrix.language}}/app:${{matrix.directory}}"
+
+
+      
+
+      
+
         
         
             

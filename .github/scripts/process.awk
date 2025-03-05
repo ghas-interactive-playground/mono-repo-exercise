@@ -12,6 +12,8 @@ BEGIN {
 
   # create dirs variable as empty array
   split("", dirs)
+  split("", no_changes)
+  
 
   # field separator is path separator for linux
   FS = "/"
@@ -28,19 +30,39 @@ BEGIN {
       cfg_for_dir[$1]["build_mode"] \
     )
   }
+
+  # record directory where no files have changed
+  for (key in cfg_for_dir) {
+    if (!(key in dirs)) {
+      no_changes[key] = sprintf( \
+        "{\"directory\": \"%s\", \"language\": \"%s\", \"build_mode\": \"%s\"}", \
+        key, \
+        cfg_for_dir[key]["lang"], \
+        cfg_for_dir[key]["build_mode"] \
+      )
+    }
+  }
+  
 }
 
 END {
-  # print json
-  print "{\"changes\":["
+  printf "{ \"changes\":["
 
+  # Print changes
+  sep = ""
   for (key in dirs) {
-    idx++
-    print dirs[key]
-    if (idx < length(dirs)) {
-      print ","
-    }
+    printf "%s%s", sep, dirs[key]
+    sep = ","
   }
 
-  print "]}"
+  printf "], \"no_changes\":["
+
+  # Print no_changes
+  sep = ""
+  for (key in no_changes) {
+    printf "%s%s", sep, no_changes[key]
+    sep = ","
+  }
+
+  printf "]}\n"
 }
